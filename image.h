@@ -7,7 +7,9 @@ typedef enum img_errors{
 	EWRONGHEAD
 } img_errors;
 
-typedef int (*op_callback)(FILE *image, image_t *image);
+typedef struct image_t image_t;
+
+typedef int (*op_callback)(FILE *imagefile, image_t *image);
 
 typedef struct spec_ops{
 	uint16_t type;
@@ -24,14 +26,15 @@ typedef struct pixel_t{
 	uint8_t b;
 } pixel_t;
 
-typedef struct image_t{
+struct image_t{
 	uint32_t width;
 	uint32_t height;
 	uint32_t depth;
 	uint32_t offset;
 	spec_ops *ops;
 	pixel_t *pixels;
-} image_t;
+};
+
 
 int read_image(const char *imagepath, image_t *image);
 int get_type(FILE *image, uint16_t *type);
