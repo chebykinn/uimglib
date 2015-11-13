@@ -21,9 +21,9 @@ typedef struct spec_ops{
 } spec_ops;
 
 typedef struct pixel_t{
-	uint8_t r;
-	uint8_t g;
 	uint8_t b;
+	uint8_t g;
+	uint8_t r;
 } pixel_t;
 
 struct image_t{
