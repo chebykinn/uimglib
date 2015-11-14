@@ -1,11 +1,12 @@
 #ifndef IMAGE_H
 #define IMAGE_H
-
+#define SIGN_SIZE 2
 typedef enum img_errors{
 	SUCCESS,
 	EOPENFILE,
 	EREAD,
 	EWRITE,
+	ENOIMAGE,
 	EWRONGHEAD
 } img_errors;
 
