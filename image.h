@@ -2,7 +2,7 @@
 #define IMAGE_H
 
 typedef enum img_errors{
-	SUCCESS
+	SUCCESS,
 	EOPENFILE,
 	EREAD,
 	EWRITE,
@@ -39,7 +39,7 @@ struct image_t{
 
 int read_image(const char *imagepath, image_t *image);
 int get_type(FILE *image, uint16_t *type);
-int get_spec_opts(uint16_t *type, spec_ops_t *current_ops); /* an array of callbacks */
+int get_spec_ops(uint16_t type, spec_ops_t *current_ops); /* an array of callbacks */
 
 int rotate(image_t *image_src, image_t *image_dest);
 
