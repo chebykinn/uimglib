@@ -1,4 +1,4 @@
-FLAGS=-ansi -pedantic -Wall -Werror -g -lm
+CFLAGS=-ansi -pedantic -Wall -Werror -g -lm
 CC=gcc
 OBJECTS=image.o main.o
 TARGET=uimglib
@@ -6,13 +6,7 @@ TARGET=uimglib
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CC) $(FLAGS) $^ -o $@
-
-main.o:
-	$(CC) $(FLAGS) -c main.c
-
-image.o:
-	$(CC) $(FLAGS) -c image.c
+	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
 	rm -f $(OBJECTS)
