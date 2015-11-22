@@ -19,7 +19,6 @@ void lib_init(){
 int read_image(const char *imagepath, image_t *image){
 	int result;
 	uint16_t type;
-	/*spec_ops_t current_ops;*/
 
 	FILE *im = fopen(imagepath, "rb");
 	if ( im == NULL ){
