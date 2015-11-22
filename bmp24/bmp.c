@@ -85,10 +85,16 @@ int write_bmp_body(FILE *imagefile, image_t *image){
 
 	fseek(imagefile, image->offset, SEEK_SET);
 	for(y = 0; y < height; y++){
-		fwrite(&image->pixels[y*width], width*sizeof(pixel_t), 1, imagefile);
-
+		size_t res = fwrite(&image->pixels[y*width], width*sizeof(pixel_t), 1, imagefile);
+		if( res < 1 ){
+			return EWRITE;
+		}
+		
 		/* Write paddings */
-		fwrite(&padding, left, 1, imagefile);
+		res = fwrite(&padding, left, 1, imagefile);
+		if( res < 1 ){
+			return EWRITE;
+		}
 	}
 	return SUCCESS;
 }
