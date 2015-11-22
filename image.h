@@ -1,14 +1,18 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 #define SIGN_SIZE 2
-typedef enum img_errors{
+#define SUPPORTED_FORMATS_NUM 1
+#define ERRORS_AMOUNT 6
+typedef enum img_errors_t{
 	SUCCESS,
 	EOPENFILE,
 	EREAD,
 	EWRITE,
 	ENOIMAGE,
 	EWRONGHEAD
-} img_errors;
+} img_errors_t;
+
+extern const char *err_msgs[ERRORS_AMOUNT]; 
 
 typedef struct image_t image_t;
 
@@ -22,6 +26,8 @@ typedef struct spec_ops_t{
 	op_callback_t write_spec_head;
 	op_callback_t write_spec_body;
 } spec_ops_t;
+
+spec_ops_t operations[SUPPORTED_FORMATS_NUM];
 
 typedef struct pixel_t{
 	uint8_t b;
@@ -38,11 +44,15 @@ struct image_t{
 	pixel_t *pixels;
 };
 
+
+void lib_init();
 int read_image(const char *imagepath, image_t *image);
 int get_type(FILE *image, uint16_t *type);
-int get_spec_ops(uint16_t type, spec_ops_t *current_ops); /* an array of callbacks */
+int get_spec_ops(uint16_t type, spec_ops_t **current_ops);
 
-int rotate(image_t *image_src, image_t *image_dest);
+int rotate_image(image_t *image, int to_right);
 
 int write_image(const char *imagepath, image_t *image);
+
+const char *get_error_msg(img_errors_t errno);
 #endif
