@@ -1,12 +1,25 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include "image.h"
+#include "bmp24/bmp.h"
+const char *err_msgs[ERRORS_AMOUNT] = {
+	"Success",
+	"Can't open image file",
+	"Can't read image file",
+	"Can't write image file",
+	"File is not an image",
+	"Wrong image header"
+};
+
+void lib_init(){
+	operations[0] = bmp_ops;
+}
 
 int read_image(const char *imagepath, image_t *image){
 	int result;
-	size_t length;
 	uint16_t type;
-	spec_ops_t current_ops;
+	/*spec_ops_t current_ops;*/
 
 	FILE *im = fopen(imagepath, "rb");
 	if ( im == NULL ){
@@ -20,23 +33,24 @@ int read_image(const char *imagepath, image_t *image){
 	}
 
 	/* Get operations for detected type */
-	result = get_spec_ops(type, &current_ops);
+	result = get_spec_ops(type, &image->ops);
 	if( result != SUCCESS ){
 		return result;
 	}
 
 	/* Read image header */
-	result = current_ops.read_spec_head(im, image);
+	result = image->ops->read_spec_head(im, image);
 	if( result != SUCCESS ){
 		return result;
 	}
 
 	/* Read image pixels */
-	result = current_ops.read_spec_body(im, image);
+	result = image->ops->read_spec_body(im, image);
 	if( result != SUCCESS ){
 		return result;
 	}
 
+	fclose(im);
 	return SUCCESS;
 }
 
@@ -49,22 +63,73 @@ int get_type(FILE *image, uint16_t *type){
 	rewind(image);
 	return SUCCESS;
 }
-int get_spec_ops(uint16_t type, spec_ops_t *current_ops){
-	/* an array of callbacks */
-	spec_ops_t *operations;
-	int i, size;
-	for (i = 0; i < size; i++){
+
+int get_spec_ops(uint16_t type, spec_ops_t **current_ops){
+	/* Using an array of callbacks */
+	int i;
+	for (i = 0; i < SUPPORTED_FORMATS_NUM; i++){
 		if( operations[i].type == type ){
-			current_ops = &operations[i];
+			*current_ops = &operations[i];
 		}
 	}
 	return SUCCESS;
 }
 
 int write_image(const char *imagepath, image_t *image){
+	int result;
+	FILE *im = fopen(imagepath, "wb");
+	if ( im == NULL ){
+		return EOPENFILE;
+	}
+
+	/* Write image header */
+	result = image->ops->write_spec_head(im, image);
+	if( result != SUCCESS ){
+		return result;
+	}
+
+	/* Write image pixels */
+	result = image->ops->write_spec_body(im, image);
+	if( result != SUCCESS ){
+		return result;
+	}
+	fclose(im);
 	return SUCCESS;
 }
 
-int rotate(image_t *image_src, image_t *image_dest){
+int rotate_image(image_t *image, int to_right){
+	uint32_t x, y, old_width = image->width, old_height = image->height;
+	pixel_t *new_pixels;
+	new_pixels = malloc(old_width*old_height*sizeof(pixel_t));
+	
+	image->width = old_height;
+
+	image->height = old_width;
+
+	for (y = 0; y < old_height; y++){
+		for (x = 0; x < old_width; x++){
+			uint32_t new_x, new_y;
+			if ( !to_right ){
+				new_x = (old_height - 1) - y;
+				new_y = x;
+			}else{
+				new_x = y;
+				new_y = (old_width - 1) - x;
+			}
+			new_pixels[new_y*old_height + new_x] = image->pixels[y*old_width + x];
+		}
+	}
+
+	free(image->pixels);
+
+	image->pixels = new_pixels;
+
 	return SUCCESS;
+}
+
+const char *get_error_msg(img_errors_t errno){
+	if( errno >= SUCCESS && errno <= EWRONGHEAD ){
+		return err_msgs[errno];
+	}
+	return err_msgs[SUCCESS];
 }
