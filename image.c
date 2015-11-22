@@ -67,10 +67,14 @@ int get_type(FILE *image, uint16_t *type){
 int get_spec_ops(uint16_t type, spec_ops_t **current_ops){
 	/* Using an array of callbacks */
 	int i;
+	*current_ops = NULL;
 	for (i = 0; i < SUPPORTED_FORMATS_NUM; i++){
 		if( operations[i].type == type ){
 			*current_ops = &operations[i];
 		}
+	}
+	if( *current_ops == NULL ){
+		return ENOIMAGE;
 	}
 	return SUCCESS;
 }
