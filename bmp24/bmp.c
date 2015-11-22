@@ -50,10 +50,10 @@ int read_bmp_body(FILE *imagefile, image_t *image){
 }
 
 int write_bmp_head(FILE *imagefile, image_t *image){
-	uint32_t line , size, length;
+	uint32_t line, size, length;
 	bmp_header_t header;
 
-	line = floor( (BMP_24 * image->width + 31) / 32 ) * 4;
+	line = floor( (image->depth * image->width + 31) / 32 ) * 4;
 	size = line * image->height;
 	header.bfType = BMP_SIGN;
 	header.bfileSize = size + image->offset;
@@ -89,7 +89,7 @@ int write_bmp_body(FILE *imagefile, image_t *image){
 		if( res < 1 ){
 			return EWRITE;
 		}
-		
+
 		/* Write paddings */
 		res = fwrite(&padding, left, 1, imagefile);
 		if( res < 1 ){
