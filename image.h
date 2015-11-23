@@ -3,6 +3,8 @@
 #define SIGN_SIZE 2
 #define SUPPORTED_FORMATS_NUM 1
 #define ERRORS_AMOUNT 6
+#define M_PI 3.14159265358979323846
+#define LIB_VERSION "1.0"
 typedef enum img_errors_t{
 	SUCCESS,
 	EOPENFILE,
@@ -50,7 +52,7 @@ int read_image(const char *imagepath, image_t *image);
 int get_type(FILE *image, uint16_t *type);
 int get_spec_ops(uint16_t type, spec_ops_t **current_ops);
 
-int rotate_image(image_t *image, int to_right);
+int rotate_image(image_t *image, int32_t angle);
 
 int write_image(const char *imagepath, image_t *image);
 
