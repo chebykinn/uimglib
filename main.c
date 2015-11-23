@@ -5,15 +5,17 @@
 #include "image.h"
 
 int main(int argc, char *argv[]){
-	char *opts = "o:rv", *inputname, *outname;
-	int result, opt, to_right = 0, verbose = 0, width = 0, height = 0;
+	char *opts = "o:r:vV", *inputname, *outname;
+	int result, opt, verbose = 0, version = 0, width = 0, height = 0;
+	int32_t angle;
 	image_t image;
 
 	if( argc < 2 ){
-		fprintf(stderr, "Usage: %s <src_image> [-o <dest_image>] [-r] [-v]\n", argv[0]);
-		fprintf(stderr, "  -o \tSpecify file to write rotated image.\n");
-		fprintf(stderr, "  -r \tRotate by 90 degrees to the right (default is to the left).\n");
-		fprintf(stderr, "  -v \tEnable output.\n");
+		fprintf(stderr, "Usage: %s <src_image> [-o <dest_image>] [-r <angle>] [-vV]\n", argv[0]);
+		fprintf(stderr, "  -o \t\tSpecify file to write rotated image.\n");
+		fprintf(stderr, "  -r <angle> \tRotate by given angle.\n");
+		fprintf(stderr, "  -v \t\tEnable output.\n");
+		fprintf(stderr, "  -V \t\tDisplay version infomation.\n");
 		return 1;
 	}
 	inputname = argv[1];
@@ -26,14 +28,24 @@ int main(int argc, char *argv[]){
 			break;
 
 			case 'r':
-				to_right = 1;
+				angle = atoi(optarg);
 			break;
 
 			case 'v':
 				verbose = 1;
 			break;
+
+			case 'V':
+				version = 1;
+			break;
 		}
 	}
+
+	if( version ){
+		printf("uimglib %s\n", LIB_VERSION);
+		return 0;
+	}
+
 	lib_init();
 	
 	result = read_image(inputname, &image);
@@ -46,7 +58,7 @@ int main(int argc, char *argv[]){
 	}
 
 
-	result = rotate_image(&image, to_right);
+	result = rotate_image(&image, angle);
 
 
 	result = write_image(outname, &image);
@@ -57,11 +69,7 @@ int main(int argc, char *argv[]){
 
 	if( verbose ){
 		printf("Opened %s, size: %dx%d\n", inputname, width, height);
-		if( !to_right ){
-			printf("Rotated %s by 90 degrees to left\n", inputname);
-		}else{
-			printf("Rotated %s by 90 degrees to right\n", inputname);
-		}
+		printf("Rotated %s by %d degrees\n", inputname, angle);
 		printf("Wrote %s, size: %dx%d\n", outname, image.width, image.height);
 	}
 
