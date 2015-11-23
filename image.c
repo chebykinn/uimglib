@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <math.h>
 #include "image.h"
 #include "bmp24/bmp.h"
 const char *err_msgs[ERRORS_AMOUNT] = {
@@ -100,26 +101,54 @@ int write_image(const char *imagepath, image_t *image){
 	return SUCCESS;
 }
 
-int rotate_image(image_t *image, int to_right){
-	uint32_t x, y, old_width = image->width, old_height = image->height;
+static int min(int a, int b){
+	return (a < b) ? a : b;
+}
+
+static int max(int a, int b){
+	return (a > b) ? a : b;
+}
+
+int rotate_image(image_t *image, int32_t angle){
+	int x, y, old_width = image->width, old_height = image->height;
 	pixel_t *new_pixels;
-	new_pixels = malloc(old_width*old_height*sizeof(pixel_t));
+
+	float radians = (2 * M_PI * angle) / 360; 
 	
-	image->width = old_height;
+	float cosine = (float) cos(radians); 
+	float sine = (float) sin(radians); 
+	
+	int x1 = ceil(-old_height * sine); 
+	int y1 = ceil(old_height * cosine); 
+	int x2 = ceil(old_width * cosine - old_height * sine); 
+	int y2 = ceil(old_height * cosine + old_width * sine); 
+	int x3 = ceil(old_width * cosine); 
+	int y3 = ceil(old_width * sine); 
+	
+	int min_x = min(0,  min(x1, min(x2, x3))); 
+	int min_y = min(0,  min(y1, min(y2, y3))); 
+	int max_x = max(x1, max(x2, x3)); 
+	int max_y = max(y1, max(y2, y3)); 
+	
+	int dest_width = max_x - min_x;
+	int dest_height = max_y - min_y;
 
-	image->height = old_width;
+	image->width = dest_width;
+	image->height = dest_height;
+	
+	new_pixels = malloc(image->width*image->height*sizeof(pixel_t));
 
-	for (y = 0; y < old_height; y++){
-		for (x = 0; x < old_width; x++){
-			uint32_t new_x, new_y;
-			if ( !to_right ){
-				new_x = (old_height - 1) - y;
-				new_y = x;
+	for(y = 0; y < dest_height; y++){
+		for(x = 0; x < dest_width; x++ ){
+			int sourcex = ceil((x+min_x)*cosine + (y+min_y)*sine);
+			int sourcey = ceil((y+min_y)*cosine - (x+min_x)*sine);
+			if( sourcex >= 0 && sourcex < old_width
+				&& sourcey >= 0 && sourcey < old_height ){
+				new_pixels[y*dest_width+x] = image->pixels[sourcey*old_width+sourcex];
 			}else{
-				new_x = y;
-				new_y = (old_width - 1) - x;
+				pixel_t nul = {0xff, 0xff, 0xff};
+				new_pixels[y*dest_width+x] = nul;
 			}
-			new_pixels[new_y*old_height + new_x] = image->pixels[y*old_width + x];
 		}
 	}
 
