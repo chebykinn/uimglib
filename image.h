@@ -3,7 +3,7 @@
 #define SIGN_SIZE 2
 #define SUPPORTED_FORMATS_NUM 1
 #define ERRORS_AMOUNT 6
-#define M_PI 3.14159265358979323846
+
 #define LIB_VERSION "1.0"
 typedef enum img_errors_t{
 	SUCCESS,
