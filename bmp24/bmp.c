@@ -81,10 +81,11 @@ int write_bmp_head(FILE *imagefile, image_t *image){
 
 int write_bmp_body(FILE *imagefile, image_t *image){
 	uint32_t y, width = image->width, height = image->height, left = width % 4;
-
+	uint8_t padding = 0;
 	fseek(imagefile, image->offset, SEEK_SET);
 	for(y = 0; y < height; y++){
-		size_t res = fwrite(&image->pixels[y*width], width*sizeof(pixel_t)+left, 1, imagefile);
+		size_t res = fwrite(&image->pixels[y*width], width*sizeof(pixel_t), 1, imagefile);
+		fwrite(&padding, left, 1, imagefile);
 		if( res < 1 ){
 			return EWRITE;
 		}
