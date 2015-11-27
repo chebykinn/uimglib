@@ -1,6 +1,6 @@
-CFLAGS=-ansi -pedantic -Wall -Werror -g -fPIC -lm
+CFLAGS=-ansi -pedantic -Wall -Werror -g -fPIC
 FLAGS=-shared
-BINFLAGS=-ansi -pedantic -Wall -Werror -g -L. -luimg
+BINFLAGS=-ansi -pedantic -Wall -Werror -g -L. -luimg -lm
 CC=gcc
 OBJECTS=bmp24/bmp.o image.o
 TARGET=uimglib
